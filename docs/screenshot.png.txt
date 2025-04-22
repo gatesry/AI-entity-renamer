@@ -1,6 +1,6 @@
 This is a placeholder for the screenshot image.
 
-In a real implementation, you would replace this with an actual screenshot of the Entity Renamer interface in Home Assistant.
+In a real implementation, you would replace this with an actual screenshot of the AI Entity Renamer interface in Home Assistant.
 
 The screenshot should show:
 1. The main entity list with some entities displayed

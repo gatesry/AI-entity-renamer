@@ -1,4 +1,4 @@
-# Entity Renamer for Home Assistant
+# AI Entity Renamer for Home Assistant
 
 A custom component for Home Assistant that allows you to bulk rename entities using OpenAI suggestions.
 
@@ -20,7 +20,7 @@ A custom component for Home Assistant that allows you to bulk rename entities us
 3. Click the three dots in the top right corner and select "Custom repositories"
 4. Add the URL of this repository and select "Integration" as the category
 5. Click "Add"
-6. Search for "Entity Renamer" in HACS and install it
+6. Search for "AI Entity Renamer" in HACS and install it
 7. Restart Home Assistant
 
 ### Manual Installation
@@ -33,13 +33,13 @@ A custom component for Home Assistant that allows you to bulk rename entities us
 ## Configuration
 
 1. Go to Settings > Devices & Services
-2. Click "Add Integration" and search for "Entity Renamer"
+2. Click "Add Integration" and search for "AI Entity Renamer"
 3. Follow the configuration steps to add your OpenAI API key
 
 ## Usage
 
-1. After installation, you'll see a new "Entity Renamer" icon in your Home Assistant sidebar
-2. Click on it to open the Entity Renamer interface
+1. After installation, you'll see a new "AI Entity Renamer" icon in your Home Assistant sidebar
+2. Click on it to open the AI Entity Renamer interface
 3. Browse or search for entities you want to rename
 4. Select the entities you want to rename
 5. Click "Get Name Suggestions" to receive AI-generated name suggestions

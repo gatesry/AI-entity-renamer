@@ -26,7 +26,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     frontend.async_register_built_in_panel(
         hass,
         component_name="custom",
-        sidebar_title="Entity Renamer",
+        sidebar_title="AI Entity Renamer",
         sidebar_icon="mdi:rename-box",
         frontend_url_path="entity-renamer",
         require_admin=True,

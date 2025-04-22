@@ -258,7 +258,7 @@ class EntityRenamerPanel extends LitElement {
 
   render() {
     return html`
-      <ha-card header="Entity Renamer">
+      <ha-card header="AI Entity Renamer">
         <div class="card-content">
           ${this.message ? html`
             <div class="message ${this.messageType}">
