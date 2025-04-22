@@ -1,0 +1,11 @@
+{
+  "name": "Entity Renamer",
+  "render_readme": true,
+  "domain": "entity_renamer",
+  "documentation": "https://github.com/custom-components/entity_renamer",
+  "issue_tracker": "https://github.com/custom-components/entity_renamer/issues",
+  "dependencies": [],
+  "codeowners": [],
+  "requirements": ["openai>=1.0.0"],
+  "homeassistant": "2023.3.0"
+}

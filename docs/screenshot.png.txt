@@ -1,0 +1,11 @@
+This is a placeholder for the screenshot image.
+
+In a real implementation, you would replace this with an actual screenshot of the Entity Renamer interface in Home Assistant.
+
+The screenshot should show:
+1. The main entity list with some entities displayed
+2. The filtering options
+3. Some selected entities
+4. The suggestions panel with AI-generated name suggestions
+
+The image should be saved as "screenshot.png" in this directory.

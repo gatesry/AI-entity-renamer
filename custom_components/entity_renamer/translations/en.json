@@ -1,0 +1,38 @@
+{
+  "config": {
+    "title": "Entity Renamer",
+    "step": {
+      "user": {
+        "title": "Configure Entity Renamer",
+        "description": "Set up the Entity Renamer integration with your OpenAI API key.",
+        "data": {
+          "api_key": "OpenAI API Key"
+        }
+      }
+    },
+    "error": {
+      "api_key_required": "OpenAI API key is required",
+      "invalid_api_key": "Invalid OpenAI API key",
+      "openai_not_installed": "OpenAI Python package is not installed"
+    },
+    "abort": {
+      "already_configured": "Entity Renamer is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Entity Renamer Options",
+        "description": "Update your OpenAI API key.",
+        "data": {
+          "api_key": "OpenAI API Key"
+        }
+      }
+    },
+    "error": {
+      "api_key_required": "OpenAI API key is required",
+      "invalid_api_key": "Invalid OpenAI API key",
+      "openai_not_installed": "OpenAI Python package is not installed"
+    }
+  }
+}
