@@ -15,13 +15,17 @@ A custom component for Home Assistant that allows you to bulk rename entities us
 
 ### HACS Installation (Recommended)
 
+This integration is fully compatible with [HACS](https://hacs.xyz/).
+
 1. Make sure you have [HACS](https://hacs.xyz/) installed
 2. Go to HACS > Integrations
 3. Click the three dots in the top right corner and select "Custom repositories"
-4. Add the URL of this repository and select "Integration" as the category
+4. Add the URL `https://github.com/terkilddk/AI-entity-renamer` and select "Integration" as the category
 5. Click "Add"
 6. Search for "AI Entity Renamer" in HACS and install it
 7. Restart Home Assistant
+
+Once installed, the integration will automatically maintain its version information and can be updated through HACS when new versions are released.
 
 ### Manual Installation
 
@@ -62,6 +66,15 @@ data:
   new_name: Living Room Ceiling Light
 ```
 
+## Versioning
+
+The current version of this integration is managed in multiple places for consistency:
+- `custom_components/entity_renamer/manifest.json`
+- `version.json`
+- `CHANGELOG.md`
+
+Version updates are handled automatically during releases. You can always find the current version in the Home Assistant integrations page or in the files above.
+
 ## Requirements
 
 - Home Assistant 2023.3.0 or newer
@@ -74,6 +87,10 @@ This integration sends entity information (entity ID, current name, device name,
 ## Support
 
 If you encounter any issues or have questions, please open an issue on the GitHub repository.
+
+## Brands Compliance
+
+To ensure your integration's logo and UI elements display correctly in Home Assistant, you must register your integration with the [home-assistant/brands](https://github.com/home-assistant/brands) repository. See the official documentation for details.
 
 ## License
 

@@ -11,8 +11,9 @@ from homeassistant.components.http import HomeAssistantView
 import homeassistant.helpers.entity_registry as er
 import json
 
+from .const import DOMAIN, VERSION
+
 _LOGGER = logging.getLogger(__name__)
-DOMAIN = "entity_renamer"
 
 CONFIG_SCHEMA = vol.Schema(
     {DOMAIN: vol.Schema({})}, extra=vol.ALLOW_EXTRA
@@ -20,6 +21,7 @@ CONFIG_SCHEMA = vol.Schema(
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the Entity Renamer component."""
+    _LOGGER.info("Starting AI Entity Renamer version %s", VERSION)
     hass.data[DOMAIN] = {}
 
     # Register the panel
