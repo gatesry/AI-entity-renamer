@@ -362,8 +362,11 @@ class EntityRenamerPanel extends LitElement {
             
             <div class="actions">
               <span>${this.selectedEntities.length} entities selected</span>
+              <div class="button-highlight-message">
+                <strong>This is the "Get Name Suggestions" button ↓</strong>
+              </div>
               <button
-                class="primary"
+                class="primary get-suggestions-highlight"
                 ?disabled=${this.selectedEntities.length === 0 || this.suggestionsLoading}
                 @click=${this.getSuggestions}
               >
@@ -555,10 +558,33 @@ class EntityRenamerPanel extends LitElement {
       
       .actions {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        border: 2px dashed #03a9f4;
+        background: #e3f2fd;
+        padding: 16px;
         margin-top: 16px;
         margin-bottom: 24px;
+      }
+
+      .button-highlight-message {
+        color: #01579b;
+        background: #b3e5fc;
+        padding: 4px 8px;
+        border-radius: 4px;
+        margin-bottom: 4px;
+        font-size: 1em;
+      }
+
+      .get-suggestions-highlight {
+        border: 2px solid #0288d1;
+        background: #03a9f4;
+        color: #fff;
+        font-size: 1.2em;
+        font-weight: bold;
+        box-shadow: 0 2px 12px rgba(2,136,209,0.15);
+        margin-top: 4px;
       }
       
       button {
