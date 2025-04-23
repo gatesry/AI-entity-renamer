@@ -593,12 +593,14 @@ class EntityRenamerPanel extends LitElement {
         border-radius: 4px;
         padding: 8px 16px;
         background-color: var(--secondary-background-color, #f5f5f5);
-        color: var(--primary-text-color);
+        color: var(--primary-text-color, #212121);
+        font-family: inherit;
+        transition: background 0.2s, color 0.2s;
       }
       
       button.primary {
-        background-color: var(--primary-color);
-        color: white;
+        background-color: var(--primary-color, #03a9f4);
+        color: var(--text-primary-color, #fff);
         font-size: 1.1em;
         font-weight: 600;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
@@ -610,8 +612,8 @@ class EntityRenamerPanel extends LitElement {
       }
       
       .apply-button {
-        background-color: var(--primary-color);
-        color: white;
+        background-color: var(--primary-color, #03a9f4);
+        color: var(--text-primary-color, #fff);
         padding: 4px 8px;
         font-size: 0.9em;
       }
