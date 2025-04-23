@@ -52,7 +52,13 @@ class EntityRenamerPanel extends LitElement {
   async loadEntities() {
     this.loading = true;
     try {
-      const response = await fetch("/api/entity_renamer/entities");
+      const headers = {};
+      if (this.hass && this.hass.auth && this.hass.auth.accessToken) {
+        headers["Authorization"] = `Bearer ${this.hass.auth.accessToken}`;
+      }
+      const response = await fetch("/api/entity_renamer/entities", {
+        headers,
+      });
       if (response.ok) {
         const data = await response.json();
         this.entities = data;
@@ -134,11 +140,15 @@ class EntityRenamerPanel extends LitElement {
     this.suggestions = [];
     
     try {
+      const headers = {
+        "Content-Type": "application/json",
+      };
+      if (this.hass && this.hass.auth && this.hass.auth.accessToken) {
+        headers["Authorization"] = `Bearer ${this.hass.auth.accessToken}`;
+      }
       const response = await fetch("/api/entity_renamer/suggest", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify({
           entities: this.selectedEntities,
         }),
@@ -161,11 +171,15 @@ class EntityRenamerPanel extends LitElement {
 
   async applyRename(entity, suggestedName) {
     try {
+      const headers = {
+        "Content-Type": "application/json",
+      };
+      if (this.hass && this.hass.auth && this.hass.auth.accessToken) {
+        headers["Authorization"] = `Bearer ${this.hass.auth.accessToken}`;
+      }
       const response = await fetch("/api/entity_renamer/rename", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify({
           entity_id: entity.entity_id,
           new_name: suggestedName,
@@ -204,12 +218,16 @@ class EntityRenamerPanel extends LitElement {
       return;
     }
 
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    if (this.hass && this.hass.auth && this.hass.auth.accessToken) {
+      headers["Authorization"] = `Bearer ${this.hass.auth.accessToken}`;
+    }
     const promises = this.suggestions.map(suggestion => 
       fetch("/api/entity_renamer/rename", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify({
           entity_id: suggestion.entity_id,
           new_name: suggestion.suggested_name,
