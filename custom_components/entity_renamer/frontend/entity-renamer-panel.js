@@ -429,6 +429,7 @@ class EntityRenamerPanel extends LitElement {
       :host {
         display: block;
         padding: 16px;
+        font-family: var(--primary-font-family, "Roboto", "system-ui", "sans-serif");
       }
       
       ha-card {
@@ -572,6 +573,9 @@ class EntityRenamerPanel extends LitElement {
       button.primary {
         background-color: var(--primary-color);
         color: white;
+        font-size: 1.1em;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
       }
       
       button:disabled {
