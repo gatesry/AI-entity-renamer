@@ -7,7 +7,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
-from homeassistant.components.http import HomeAssistantView
+from homeassistant.components.http import HomeAssistantView, StaticPathConfig
+from homeassistant.helpers.device_registry import async_get as async_get_device_registry
 import homeassistant.helpers.entity_registry as er
 import json
 
@@ -58,11 +59,13 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     )
 
     # Serve local files
-    hass.http.register_static_path(
-        "/entity_renamer", 
-        os.path.join(os.path.dirname(__file__), "frontend"),
-        cache_headers=False
-    )
+    await hass.http.async_register_static_paths([
+        StaticPathConfig(
+            "/entity_renamer",
+            os.path.join(os.path.dirname(__file__), "frontend"),
+            False
+        )
+    ])
 
     return True
 
@@ -94,7 +97,7 @@ class EntityListView(HomeAssistantView):
             area_name = "No Area"
             
             if device_id:
-                device_registry = hass.helpers.device_registry.async_get(hass)
+                device_registry = async_get_device_registry(hass)
                 device = device_registry.async_get(device_id)
                 if device:
                     device_name = device.name or device.model or "Unknown Device"
