@@ -10,6 +10,7 @@ from homeassistant.helpers.typing import ConfigType
 from homeassistant.components.http import HomeAssistantView, StaticPathConfig
 from homeassistant.helpers.device_registry import async_get as async_get_device_registry
 import homeassistant.helpers.entity_registry as er
+from homeassistant.helpers.area_registry import async_get as async_get_area_registry
 import json
 
 from .const import DOMAIN, VERSION
@@ -105,7 +106,7 @@ class EntityListView(HomeAssistantView):
             
             # Get area info if available
             if area_id:
-                area_registry = hass.helpers.area_registry.async_get(hass)
+                area_registry = async_get_area_registry(hass)
                 area = area_registry.async_get_area(area_id)
                 if area:
                     area_name = area.name
