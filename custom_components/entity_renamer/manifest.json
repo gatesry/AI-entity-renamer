@@ -3,9 +3,16 @@
   "name": "AI Entity Renamer",
   "documentation": "https://github.com/gatesry/AI-entity-renamer",
   "issue_tracker": "https://github.com/gatesry/AI-entity-renamer/issues",
-  "dependencies": ["http"],
-  "codeowners": ["@gatesry"],
-  "requirements": ["openai>=1.0.0", "httpx>=0.24.1"],
+  "dependencies": [
+    "http"
+  ],
+  "codeowners": [
+    "@gatesry"
+  ],
+  "requirements": [
+    "openai>=1.0.0",
+    "httpx>=0.24.1"
+  ],
   "config_flow": true,
   "version": "1.0.7",
   "iot_class": "local_polling",
