@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `apply_device_rename` service for programmatic device updates
 - Separate tabs for entity and device renaming in the web interface
 - Development requirements now include Home Assistant and pytest-asyncio for testing
+- Added `hacs.json` metadata so the integration can be installed through HACS
 
 ## [1.0.0] - 2025-04-22
 
