@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - OpenAI-powered device name suggestions
 - Frontend table for selecting devices and applying name suggestions
 - `apply_device_rename` service for programmatic device updates
+- Separate tabs for entity and device renaming in the web interface
+- Development requirements now include Home Assistant and pytest-asyncio for testing
 
 ## [1.0.0] - 2025-04-22
 

@@ -28,6 +28,7 @@ class EntityRenamerPanel extends LitElement {
       selectedDevices: { type: Array },
       deviceSuggestions: { type: Array },
       deviceSuggestionsLoading: { type: Boolean },
+      view: { type: String },
     };
   }
 
@@ -50,6 +51,7 @@ class EntityRenamerPanel extends LitElement {
     this.selectedDevices = [];
     this.deviceSuggestions = [];
     this.deviceSuggestionsLoading = false;
+    this.view = "entities";
   }
 
   connectedCallback() {
@@ -483,12 +485,27 @@ class EntityRenamerPanel extends LitElement {
     return html`
       <ha-card header="AI Entity Renamer">
         <div class="card-content">
+          <div class="view-tabs">
+            <button
+              class="${this.view === 'entities' ? 'active' : ''}"
+              @click=${() => (this.view = 'entities')}
+            >
+              Entities
+            </button>
+            <button
+              class="${this.view === 'devices' ? 'active' : ''}"
+              @click=${() => (this.view = 'devices')}
+            >
+              Devices
+            </button>
+          </div>
           ${this.message ? html`
             <div class="message ${this.messageType}">
               ${this.message}
             </div>
           ` : ""}
 
+          ${this.view === 'entities' ? html`
           <div class="filters">
             <div class="search-box">
               <ha-icon icon="mdi:magnify"></ha-icon>
@@ -646,8 +663,7 @@ class EntityRenamerPanel extends LitElement {
                 </div>
               </div>
             ` : ""}
-            <hr />
-            <h2>Devices</h2>
+          ` : html`
             <div class="entity-table-container">
               <div class="select-all-row">
                 <input
@@ -823,6 +839,17 @@ class EntityRenamerPanel extends LitElement {
         background-color: #EBF8FF;
         color: #2C5282;
         border: 1px solid #BEE3F8;
+      }
+
+      .view-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      .view-tabs button.active {
+        background-color: var(--primary-color, #03a9f4);
+        color: var(--text-primary-color, #fff);
       }
 
       .filters {
