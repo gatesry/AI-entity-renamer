@@ -1,15 +1,16 @@
 # AI Entity Renamer for Home Assistant
 
-A custom component for Home Assistant that allows you to bulk rename entities using OpenAI suggestions.
+A custom component for Home Assistant that allows you to bulk rename entities and devices using OpenAI suggestions.
 
 ## Features
 
 - View all entities in your Home Assistant instance with their area, device, name, and entity ID
+- View devices with their area, manufacturer, and model
 - Group entities by area with collapsible headers to handle large lists
 - Filter entities by area, device, or search term
-- Select multiple entities for bulk renaming
-- Get AI-powered entity ID suggestions from OpenAI following a structured naming template
-- Apply suggested IDs and friendly names individually or all at once
+- Select multiple entities or devices for bulk renaming
+- Get AI-powered entity ID or device name suggestions from OpenAI following a structured naming template
+- Apply suggested IDs and friendly names or device names individually or all at once
 - Access via a dedicated sidebar icon
 
 ## Installation
@@ -47,8 +48,8 @@ Once installed, the integration will automatically maintain its version informat
 2. Click on it to open the AI Entity Renamer interface
 3. Browse or search for entities you want to rename
 4. Select the entities you want to rename
-5. Click "Get ID Suggestions" to receive AI-generated entity ID suggestions
-6. Review the suggestions and apply them individually or all at once. When a suggestion is applied, the entity's ID and friendly name are updated to match the template.
+5. Click "Get ID Suggestions" or "Get Name Suggestions" to receive AI-generated suggestions
+6. Review the suggestions and apply them individually or all at once. When an entity suggestion is applied, the entity's ID and friendly name are updated to match the template. When a device suggestion is applied, the device's name is updated.
 
 ### How naming suggestions work
 
@@ -66,21 +67,31 @@ each ID so you can review the proposed change.
 
 ## Services
 
-The integration provides the following service:
+The integration provides the following services:
 
 - `entity_renamer.apply_rename`: Rename a specific entity
   - `entity_id`: The current entity ID
   - `new_entity_id`: The new entity ID
   - `new_name` (optional): The friendly name to apply
+- `entity_renamer.apply_device_rename`: Rename a specific device
+  - `device_id`: The device ID
+  - `new_name`: The new device name
 
 Example service call:
 
 ```yaml
+# Rename an entity
 service: entity_renamer.apply_rename
 data:
   entity_id: light.living_room
   new_entity_id: light.lr_ceiling_light
   new_name: "LR Ceiling Light"
+
+# Rename a device
+service: entity_renamer.apply_device_rename
+data:
+  device_id: 123456abcdef
+  new_name: "Living Room Sensor"
 ```
 
 ## Versioning
