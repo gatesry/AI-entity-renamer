@@ -23,3 +23,22 @@ apply_rename:
       example: "LR Ceiling Light"
       selector:
         text: {}
+
+apply_device_rename:
+  name: Apply Device Rename
+  description: Rename a Home Assistant device.
+  fields:
+    device_id:
+      name: Device ID
+      description: The device ID to rename.
+      required: true
+      example: "123456abcdef"
+      selector:
+        text: {}
+    new_name:
+      name: New Name
+      description: The new device name.
+      required: true
+      example: "Living Room Sensor"
+      selector:
+        text: {}

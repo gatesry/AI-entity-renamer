@@ -1,4 +1,5 @@
 """Entity Renamer integration for Home Assistant."""
+
 import json
 import logging
 import os
@@ -47,6 +48,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     hass.http.register_view(EntityListView)
     hass.http.register_view(RenameEntityView)
     hass.http.register_view(OpenAISuggestionsView)
+    hass.http.register_view(DeviceListView)
+    hass.http.register_view(RenameDeviceView)
+    hass.http.register_view(OpenAIDeviceSuggestionsView)
 
     # Register services
     hass.services.async_register(
@@ -57,6 +61,17 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             {
                 vol.Required("entity_id"): cv.string,
                 vol.Required("new_entity_id"): cv.string,
+            }
+        ),
+    )
+    hass.services.async_register(
+        DOMAIN,
+        "apply_device_rename",
+        apply_device_rename_service,
+        schema=vol.Schema(
+            {
+                vol.Required("device_id"): cv.string,
+                vol.Required("new_name"): cv.string,
             }
         ),
     )
@@ -129,6 +144,38 @@ class EntityListView(HomeAssistantView):
         return self.json(entities)
 
 
+class DeviceListView(HomeAssistantView):
+    """View to handle Device List requests."""
+
+    url = "/api/entity_renamer/devices"
+    name = "api:entity_renamer:devices"
+
+    async def get(self, request):
+        """Handle GET request for device list."""
+        hass = request.app["hass"]
+        device_registry = async_get_device_registry(hass)
+        area_registry = async_get_area_registry(hass)
+
+        devices = []
+        for device_id, device in device_registry.devices.items():
+            area_name = "No Area"
+            if device.area_id:
+                area = area_registry.async_get_area(device.area_id)
+                if area:
+                    area_name = area.name
+            devices.append(
+                {
+                    "id": device_id,
+                    "name": device.name or device.model or "Unknown Device",
+                    "manufacturer": device.manufacturer or "",
+                    "model": device.model or "",
+                    "area_name": area_name,
+                }
+            )
+
+        return self.json(devices)
+
+
 class RenameEntityView(HomeAssistantView):
     """View to handle Entity Rename requests."""
 
@@ -159,6 +206,35 @@ class RenameEntityView(HomeAssistantView):
             return self.json({"success": True})
         except Exception as e:
             _LOGGER.error("Error renaming entity: %s", e)
+            return self.json({"success": False, "error": str(e)}, status_code=500)
+
+
+class RenameDeviceView(HomeAssistantView):
+    """View to handle Device Rename requests."""
+
+    url = "/api/entity_renamer/rename_device"
+    name = "api:entity_renamer:rename_device"
+
+    async def post(self, request):
+        """Handle POST request for renaming devices."""
+        hass = request.app["hass"]
+        data = await request.json()
+
+        device_id = data.get("device_id")
+        new_name = data.get("new_name")
+
+        if not device_id or new_name is None:
+            return self.json(
+                {"success": False, "error": "Missing device_id or new_name"},
+                status_code=400,
+            )
+
+        registry = async_get_device_registry(hass)
+        try:
+            registry.async_update_device(device_id, name=new_name)
+            return self.json({"success": True})
+        except Exception as e:
+            _LOGGER.error("Error renaming device: %s", e)
             return self.json({"success": False, "error": str(e)}, status_code=500)
 
 
@@ -307,6 +383,112 @@ class OpenAISuggestionsView(HomeAssistantView):
             return self.json({"success": False, "error": str(e)}, status_code=500)
 
 
+class OpenAIDeviceSuggestionsView(HomeAssistantView):
+    """View to handle OpenAI Device Name Suggestions requests."""
+
+    url = "/api/entity_renamer/suggest_device"
+    name = "api:entity_renamer:suggest_device"
+
+    async def post(self, request):
+        """Handle POST request for device name suggestions."""
+        hass = request.app["hass"]
+        data = await request.json()
+
+        devices = data.get("devices", [])
+
+        if not devices:
+            return self.json({"success": False, "error": "No devices provided"}, status_code=400)
+
+        try:
+            import openai
+
+            config_entries = hass.config_entries.async_entries(DOMAIN)
+            if not config_entries:
+                return self.json(
+                    {"success": False, "error": "Integration not configured"}, status_code=400
+                )
+
+            api_key = config_entries[0].data.get("api_key")
+            if not api_key:
+                return self.json(
+                    {"success": False, "error": "OpenAI API key not configured"}, status_code=400
+                )
+
+            try:
+                client = openai.OpenAI(api_key=api_key, timeout=30.0)
+            except TypeError as init_error:
+                _LOGGER.warning("OpenAI client init failed, trying alternative: %s", init_error)
+                try:
+                    client = openai.OpenAI(api_key=api_key)
+                except TypeError as second_error:
+                    _LOGGER.warning(
+                        "OpenAI client init failed again, using basic HTTP client: %s",
+                        second_error,
+                    )
+                    import httpx
+
+                    client = openai.OpenAI(api_key=api_key, http_client=httpx.Client(timeout=30.0))
+
+            prompt = "Suggest concise device names for Home Assistant. Return a JSON array of names in the original order.\n\n"
+
+            for device in devices:
+                prompt += f"Current Name: {device['name']}\n"
+                prompt += f"Manufacturer: {device.get('manufacturer', '')}\n"
+                prompt += f"Model: {device.get('model', '')}\n"
+                prompt += f"Area: {device.get('area_name', '')}\n\n"
+
+            response = await hass.async_add_executor_job(
+                lambda: client.chat.completions.create(
+                    model="gpt-4",
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": (
+                                "You are a helpful assistant that suggests concise device names for Home Assistant."
+                            ),
+                        },
+                        {"role": "user", "content": prompt},
+                    ],
+                    temperature=0.7,
+                )
+            )
+
+            try:
+                content = response.choices[0].message.content
+                import re
+
+                json_match = re.search(r"\[.*\]", content, re.DOTALL)
+                if json_match:
+                    suggestions = json.loads(json_match.group(0))
+                else:
+                    suggestions = json.loads(content)
+
+                if len(suggestions) != len(devices):
+                    return self.json(
+                        {"success": False, "error": "Received incorrect number of suggestions"},
+                        status_code=500,
+                    )
+
+                result = []
+                for i, device in enumerate(devices):
+                    result.append({**device, "suggested_name": suggestions[i]})
+
+                return self.json({"success": True, "suggestions": result})
+
+            except json.JSONDecodeError:
+                return self.json(
+                    {"success": False, "error": "Failed to parse OpenAI response"}, status_code=500
+                )
+
+        except ImportError:
+            return self.json(
+                {"success": False, "error": "OpenAI package not installed"}, status_code=500
+            )
+        except Exception as e:
+            _LOGGER.error("Error getting device suggestions: %s", e)
+            return self.json({"success": False, "error": str(e)}, status_code=500)
+
+
 async def apply_rename_service(hass, service):
     """Apply rename service call."""
     entity_id = service.data.get("entity_id")
@@ -318,3 +500,12 @@ async def apply_rename_service(hass, service):
     if new_name:
         update_kwargs["name"] = new_name
     registry.async_update_entity(entity_id, **update_kwargs)
+
+
+async def apply_device_rename_service(hass, service):
+    """Apply device rename service call."""
+    device_id = service.data.get("device_id")
+    new_name = service.data.get("new_name")
+
+    registry = async_get_device_registry(hass)
+    registry.async_update_device(device_id, name=new_name)
