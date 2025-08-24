@@ -7,7 +7,7 @@ A custom component for Home Assistant that allows you to bulk rename entities us
 - View all entities in your Home Assistant instance with their area, device, name, and entity ID
 - Filter entities by area, device, or search term
 - Select multiple entities for bulk renaming
-- Get AI-powered name suggestions from OpenAI
+- Get AI-powered entity ID suggestions from OpenAI following a structured naming template
 - Apply suggested names individually or all at once
 - Access via a dedicated sidebar icon
 
@@ -46,16 +46,29 @@ Once installed, the integration will automatically maintain its version informat
 2. Click on it to open the AI Entity Renamer interface
 3. Browse or search for entities you want to rename
 4. Select the entities you want to rename
-5. Click "Get Name Suggestions" to receive AI-generated name suggestions
+5. Click "Get ID Suggestions" to receive AI-generated entity ID suggestions
 6. Review the suggestions and apply them individually or all at once
+
+### How naming suggestions work
+
+The integration submits each selected entity's ID, friendly name, device and
+area to OpenAI. The model is instructed to produce entity IDs in the form:
+
+```
+<domain>.<location_code>_<device_type>_<function>_<identifier>
+```
+
+Identifiers use lowercase letters, numbers and underscores with no leading or
+trailing underscore. OpenAI returns a JSON array of IDs in the same order,
+which are shown in the UI for you to apply.
 
 ## Services
 
 The integration provides the following service:
 
 - `entity_renamer.apply_rename`: Rename a specific entity
-  - `entity_id`: The entity ID to rename
-  - `new_name`: The new name for the entity
+  - `entity_id`: The current entity ID
+  - `new_entity_id`: The new entity ID
 
 Example service call:
 
@@ -63,7 +76,7 @@ Example service call:
 service: entity_renamer.apply_rename
 data:
   entity_id: light.living_room
-  new_name: Living Room Ceiling Light
+  new_entity_id: light.lr_ceiling_light
 ```
 
 ## Versioning
