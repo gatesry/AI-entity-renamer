@@ -56,7 +56,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         schema=vol.Schema(
             {
                 vol.Required("entity_id"): cv.string,
-                vol.Required("new_name"): cv.string,
+                vol.Required("new_entity_id"): cv.string,
             }
         ),
     )
@@ -141,16 +141,21 @@ class RenameEntityView(HomeAssistantView):
         data = await request.json()
 
         entity_id = data.get("entity_id")
+        new_entity_id = data.get("new_entity_id")
         new_name = data.get("new_name")
 
-        if not entity_id or not new_name:
+        if not entity_id or not new_entity_id:
             return self.json(
-                {"success": False, "error": "Missing entity_id or new_name"}, status_code=400
+                {"success": False, "error": "Missing entity_id or new_entity_id"},
+                status_code=400,
             )
 
         registry = er.async_get(hass)
         try:
-            registry.async_update_entity(entity_id, name=new_name)
+            update_kwargs = {"new_entity_id": new_entity_id}
+            if new_name:
+                update_kwargs["name"] = new_name
+            registry.async_update_entity(entity_id, **update_kwargs)
             return self.json({"success": True})
         except Exception as e:
             _LOGGER.error("Error renaming entity: %s", e)
@@ -267,8 +272,24 @@ class OpenAISuggestionsView(HomeAssistantView):
 
                 # Combine original entities with suggestions
                 result = []
+
+                def _id_to_name(eid: str) -> str:
+                    parts = eid.split(".", 1)
+                    if len(parts) > 1:
+                        name_part = parts[1]
+                    else:
+                        name_part = parts[0]
+                    return " ".join(word.capitalize() for word in name_part.split("_"))
+
                 for i, entity in enumerate(entities):
-                    result.append({**entity, "suggested_id": suggestions[i]})
+                    suggested_id = suggestions[i]
+                    result.append(
+                        {
+                            **entity,
+                            "suggested_id": suggested_id,
+                            "suggested_name": _id_to_name(suggested_id),
+                        }
+                    )
 
                 return self.json({"success": True, "suggestions": result})
 
@@ -289,7 +310,11 @@ class OpenAISuggestionsView(HomeAssistantView):
 async def apply_rename_service(hass, service):
     """Apply rename service call."""
     entity_id = service.data.get("entity_id")
+    new_entity_id = service.data.get("new_entity_id")
     new_name = service.data.get("new_name")
 
     registry = er.async_get(hass)
-    registry.async_update_entity(entity_id, name=new_name)
+    update_kwargs = {"new_entity_id": new_entity_id}
+    if new_name:
+        update_kwargs["name"] = new_name
+    registry.async_update_entity(entity_id, **update_kwargs)

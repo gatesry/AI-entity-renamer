@@ -110,9 +110,19 @@
             const entities = body.entities;
 
             // Generate mock suggestions
+            const toFriendlyName = (entityId) => {
+              const [, namePart] = entityId.split(".");
+              const base = namePart || entityId;
+              return base
+                .split("_")
+                .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+                .join(" ");
+            };
+
             const suggestions = entities.map(entity => ({
               ...entity,
-              suggested_id: `${entity.entity_id}`
+              suggested_id: `${entity.entity_id}`,
+              suggested_name: toFriendlyName(entity.entity_id)
             }));
 
             resolve({

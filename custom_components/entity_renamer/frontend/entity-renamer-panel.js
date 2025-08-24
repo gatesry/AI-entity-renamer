@@ -130,6 +130,15 @@ class EntityRenamerPanel extends LitElement {
     this.selectedEntities = [];
   }
 
+  toFriendlyName(entityId) {
+    const [, namePart] = entityId.split(".");
+    const base = namePart || entityId;
+    return base
+      .split("_")
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  }
+
   async getSuggestions() {
     if (this.selectedEntities.length === 0) {
       this.showMessage("Please select at least one entity", "warning");
@@ -157,7 +166,10 @@ class EntityRenamerPanel extends LitElement {
       const data = await response.json();
 
       if (data.success) {
-        this.suggestions = data.suggestions;
+        this.suggestions = data.suggestions.map(s => ({
+          ...s,
+          suggested_name: s.suggested_name || this.toFriendlyName(s.suggested_id),
+        }));
         this.showMessage("Suggestions received successfully", "success");
       } else {
         this.showMessage(`Error: ${data.error}`, "error");
@@ -169,7 +181,7 @@ class EntityRenamerPanel extends LitElement {
     }
   }
 
-  async applyRename(entity, suggestedId) {
+  async applyRename(entity, suggestedId, suggestedName) {
     try {
       const headers = {
         "Content-Type": "application/json",
@@ -182,7 +194,8 @@ class EntityRenamerPanel extends LitElement {
         headers,
         body: JSON.stringify({
           entity_id: entity.entity_id,
-          new_name: suggestedId,
+          new_entity_id: suggestedId,
+          new_name: suggestedName,
         }),
       });
 
@@ -192,7 +205,7 @@ class EntityRenamerPanel extends LitElement {
         // Update the entity in our local list
         const updatedEntities = this.entities.map((e) => {
           if (e.entity_id === entity.entity_id) {
-            return { ...e, name: suggestedId };
+            return { ...e, entity_id: suggestedId, name: suggestedName };
           }
           return e;
         });
@@ -235,7 +248,8 @@ class EntityRenamerPanel extends LitElement {
         headers,
         body: JSON.stringify({
           entity_id: suggestion.entity_id,
-          new_name: suggestion.suggested_id,
+          new_entity_id: suggestion.suggested_id,
+          new_name: suggestion.suggested_name,
         }),
       })
     );
@@ -251,7 +265,11 @@ class EntityRenamerPanel extends LitElement {
             (s) => s.entity_id === entity.entity_id
           );
           if (suggestion) {
-            return { ...entity, name: suggestion.suggested_id };
+            return {
+              ...entity,
+              entity_id: suggestion.suggested_id,
+              name: suggestion.suggested_name,
+            };
           }
           return entity;
         });
@@ -397,6 +415,7 @@ class EntityRenamerPanel extends LitElement {
                         <th>Device</th>
                         <th>Current Name</th>
                         <th>Suggested Entity ID</th>
+                        <th>Suggested Friendly Name</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
@@ -407,11 +426,16 @@ class EntityRenamerPanel extends LitElement {
                           <td>${suggestion.device_name}</td>
                           <td>${suggestion.name}</td>
                           <td>${suggestion.suggested_id}</td>
+                          <td>${suggestion.suggested_name}</td>
                           <td>
                             <button
                               class="apply-button"
                               @click=${() =>
-                                this.applyRename(suggestion, suggestion.suggested_id)}
+                                this.applyRename(
+                                  suggestion,
+                                  suggestion.suggested_id,
+                                  suggestion.suggested_name
+                                )}
                             >
                               Apply
                             </button>

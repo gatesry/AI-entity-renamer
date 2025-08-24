@@ -9,10 +9,17 @@ apply_rename:
       example: "light.living_room"
       selector:
         entity: {}
+    new_entity_id:
+      name: New Entity ID
+      description: The new entity ID.
+      required: true
+      example: "light.lr_ceiling_light"
+      selector:
+        text: {}
     new_name:
       name: New Name
-      description: The new name for the entity.
-      required: true
-      example: "Living Room Ceiling Light"
+      description: Optional friendly name to apply.
+      required: false
+      example: "LR Ceiling Light"
       selector:
         text: {}

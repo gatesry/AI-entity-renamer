@@ -15,7 +15,7 @@ Managing entity names in Home Assistant can become tedious as your smart home gr
 - Filter and search for specific entities
 - Select multiple entities for bulk renaming
 - Get AI-powered entity ID suggestions from OpenAI following a structured naming template
-- Apply suggested names individually or all at once
+- Apply suggested IDs and friendly names individually or all at once
 
 The integration adds a dedicated sidebar icon for easy access and provides a clean, intuitive interface for managing your entity names.
 
@@ -62,7 +62,22 @@ Once installed, the integration will automatically maintain its version informat
 3. Browse or search for entities you want to rename
 4. Select the entities you want to rename
 5. Click "Get ID Suggestions" to receive AI-generated entity ID suggestions
-6. Review the suggestions and apply them individually or all at once
+6. Review the suggestions and apply them individually or all at once. Applying a suggestion updates both the entity ID and its friendly name based on the suggested ID.
+
+### How naming suggestions work
+
+When you request suggestions, the integration sends each selected entity's
+ID, current name, device and area to OpenAI. The model is prompted to return
+concise IDs using the template:
+
+```
+<domain>.<location_code>_<device_type>_<function>_<identifier>
+```
+
+IDs use lowercase letters, numbers and underscores without leading or trailing
+underscores. The API responds with a JSON array of entity IDs in the same order
+as the input. The panel displays these IDs along with a readable name generated
+from each ID so you can confirm the change before applying it.
 
 ## Requirements
 
