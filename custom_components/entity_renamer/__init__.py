@@ -471,7 +471,14 @@ class OpenAIDeviceSuggestionsView(HomeAssistantView):
 
                 result = []
                 for i, device in enumerate(devices):
-                    result.append({**device, "suggested_name": suggestions[i]})
+                    suggestion = suggestions[i]
+                    if isinstance(suggestion, dict):
+                        suggestion = (
+                            suggestion.get("name")
+                            or suggestion.get("suggested_name")
+                            or next(iter(suggestion.values()), "")
+                        )
+                    result.append({**device, "suggested_name": suggestion})
 
                 return self.json({"success": True, "suggestions": result})
 

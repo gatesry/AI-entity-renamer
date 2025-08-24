@@ -179,7 +179,15 @@ class EntityRenamerPanel extends LitElement {
       const data = await response.json();
 
       if (data.success) {
-        this.deviceSuggestions = data.suggestions;
+        this.deviceSuggestions = data.suggestions.map((s) => ({
+          ...s,
+          suggested_name:
+            typeof s.suggested_name === "string"
+              ? s.suggested_name
+              : s.suggested_name?.name ||
+                s.suggested_name?.suggested_name ||
+                JSON.stringify(s.suggested_name),
+        }));
         this.showMessage("Device suggestions received successfully", "success");
       } else {
         this.showMessage(`Error: ${data.error}`, "error");
