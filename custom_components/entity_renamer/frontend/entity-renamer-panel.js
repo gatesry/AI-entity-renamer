@@ -24,6 +24,10 @@ class EntityRenamerPanel extends LitElement {
       messageType: { type: String },
       areas: { type: Array },
       devices: { type: Array },
+      deviceList: { type: Array },
+      selectedDevices: { type: Array },
+      deviceSuggestions: { type: Array },
+      deviceSuggestionsLoading: { type: Boolean },
     };
   }
 
@@ -42,11 +46,16 @@ class EntityRenamerPanel extends LitElement {
     this.messageType = "info";
     this.areas = [];
     this.devices = [];
+    this.deviceList = [];
+    this.selectedDevices = [];
+    this.deviceSuggestions = [];
+    this.deviceSuggestionsLoading = false;
   }
 
   connectedCallback() {
     super.connectedCallback();
     this.loadEntities();
+    this.loadDevices();
   }
 
   async loadEntities() {
@@ -111,6 +120,153 @@ class EntityRenamerPanel extends LitElement {
   handleDeviceFilter(e) {
     this.filterDevice = e.target.value;
     this.applyFilters();
+  }
+
+  async loadDevices() {
+    try {
+      const headers = {};
+      if (this.hass && this.hass.auth && this.hass.auth.accessToken) {
+        headers["Authorization"] = `Bearer ${this.hass.auth.accessToken}`;
+      }
+      const response = await fetch("/api/entity_renamer/devices", { headers });
+      if (response.ok) {
+        const data = await response.json();
+        this.deviceList = data;
+      } else {
+        this.showMessage("Failed to load devices", "error");
+      }
+    } catch (error) {
+      this.showMessage(`Error: ${error.message}`, "error");
+    }
+  }
+
+  toggleSelectDevice(device) {
+    const index = this.selectedDevices.findIndex((d) => d.id === device.id);
+    if (index === -1) {
+      this.selectedDevices = [...this.selectedDevices, device];
+    } else {
+      this.selectedDevices = this.selectedDevices.filter((d) => d.id !== device.id);
+    }
+  }
+
+  selectAllDevices() {
+    this.selectedDevices = [...this.deviceList];
+  }
+
+  clearDeviceSelection() {
+    this.selectedDevices = [];
+  }
+
+  async getDeviceSuggestions() {
+    if (this.selectedDevices.length === 0) {
+      this.showMessage("Please select at least one device", "warning");
+      return;
+    }
+
+    this.deviceSuggestionsLoading = true;
+    this.deviceSuggestions = [];
+
+    try {
+      const headers = { "Content-Type": "application/json" };
+      if (this.hass && this.hass.auth && this.hass.auth.accessToken) {
+        headers["Authorization"] = `Bearer ${this.hass.auth.accessToken}`;
+      }
+      const response = await fetch("/api/entity_renamer/suggest_device", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ devices: this.selectedDevices }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        this.deviceSuggestions = data.suggestions.map((s) => ({
+          ...s,
+          suggested_name:
+            typeof s.suggested_name === "string"
+              ? s.suggested_name
+              : s.suggested_name?.name ||
+                s.suggested_name?.suggested_name ||
+                JSON.stringify(s.suggested_name),
+        }));
+        this.showMessage("Device suggestions received successfully", "success");
+      } else {
+        this.showMessage(`Error: ${data.error}`, "error");
+      }
+    } catch (error) {
+      this.showMessage(`Error: ${error.message}`, "error");
+    } finally {
+      this.deviceSuggestionsLoading = false;
+    }
+  }
+
+  async applyDeviceRename(device, suggestedName) {
+    try {
+      const headers = { "Content-Type": "application/json" };
+      if (this.hass && this.hass.auth && this.hass.auth.accessToken) {
+        headers["Authorization"] = `Bearer ${this.hass.auth.accessToken}`;
+      }
+      const response = await fetch("/api/entity_renamer/rename_device", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ device_id: device.id, new_name: suggestedName }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        this.deviceList = this.deviceList.map((d) =>
+          d.id === device.id ? { ...d, name: suggestedName } : d
+        );
+        this.deviceSuggestions = this.deviceSuggestions.filter((d) => d.id !== device.id);
+        this.selectedDevices = this.selectedDevices.filter((d) => d.id !== device.id);
+        this.showMessage(`Renamed device ${device.name} successfully`, "success");
+      } else {
+        this.showMessage(`Error: ${data.error}`, "error");
+      }
+    } catch (error) {
+      this.showMessage(`Error: ${error.message}`, "error");
+    }
+  }
+
+  async applyAllDeviceSuggestions() {
+    if (this.deviceSuggestions.length === 0) {
+      this.showMessage("No device suggestions to apply", "warning");
+      return;
+    }
+
+    const headers = { "Content-Type": "application/json" };
+    if (this.hass && this.hass.auth && this.hass.auth.accessToken) {
+      headers["Authorization"] = `Bearer ${this.hass.auth.accessToken}`;
+    }
+
+    const promises = this.deviceSuggestions.map((suggestion) =>
+      fetch("/api/entity_renamer/rename_device", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ device_id: suggestion.id, new_name: suggestion.suggested_name }),
+      })
+    );
+
+    try {
+      const results = await Promise.all(promises);
+      const allSuccessful = results.every((r) => r.ok);
+
+      if (allSuccessful) {
+        this.deviceList = this.deviceList.map((device) => {
+          const suggestion = this.deviceSuggestions.find((s) => s.id === device.id);
+          if (suggestion) {
+            return { ...device, name: suggestion.suggested_name };
+          }
+          return device;
+        });
+        this.deviceSuggestions = [];
+        this.selectedDevices = [];
+        this.showMessage("All device suggestions applied successfully", "success");
+      } else {
+        this.showMessage("Some device renames failed, please try again", "error");
+      }
+    } catch (error) {
+      this.showMessage(`Error: ${error.message}`, "error");
+    }
   }
 
   toggleSelectEntity(entity) {
@@ -490,6 +646,131 @@ class EntityRenamerPanel extends LitElement {
                 </div>
               </div>
             ` : ""}
+            <hr />
+            <h2>Devices</h2>
+            <div class="entity-table-container">
+              <div class="select-all-row">
+                <input
+                  type="checkbox"
+                  ?checked=${this.selectedDevices.length === this.deviceList.length && this.deviceList.length > 0}
+                  @change=${() =>
+                    this.selectedDevices.length === this.deviceList.length
+                      ? this.clearDeviceSelection()
+                      : this.selectAllDevices()}
+                />
+                <span>Select All</span>
+              </div>
+
+              ${this.deviceList.length === 0
+                ? html`<div class="no-entities">No devices found</div>`
+                : html`
+                    <table class="entity-table device-table">
+                      <thead>
+                        <tr>
+                          <th class="select-col"></th>
+                          <th>Area</th>
+                          <th>Name</th>
+                          <th>Manufacturer</th>
+                          <th>Model</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${this.deviceList.map(
+                          (device) => html`
+                            <tr class="${this.selectedDevices.some(
+                              (d) => d.id === device.id
+                            )
+                              ? 'selected'
+                              : ''}">
+                              <td>
+                                <input
+                                  type="checkbox"
+                                  ?checked=${this.selectedDevices.some(
+                                    (d) => d.id === device.id
+                                  )}
+                                  @change=${() => this.toggleSelectDevice(device)}
+                                />
+                              </td>
+                              <td>${device.area_name}</td>
+                              <td>${device.name}</td>
+                              <td>${device.manufacturer}</td>
+                              <td>${device.model}</td>
+                            </tr>
+                          `
+                        )}
+                      </tbody>
+                    </table>
+                  `}
+            </div>
+
+            <div class="actions">
+              <span>${this.selectedDevices.length} devices selected</span>
+              <button
+                class="primary"
+                ?disabled=${
+                  this.selectedDevices.length === 0 || this.deviceSuggestionsLoading
+                }
+                @click=${this.getDeviceSuggestions}
+              >
+                ${this.deviceSuggestionsLoading
+                  ? html`
+                      <ha-circular-progress active size="small"></ha-circular-progress>
+                      Getting suggestions...
+                    `
+                  : "Get Name Suggestions"}
+              </button>
+            </div>
+
+            ${this.deviceSuggestions.length > 0
+              ? html`
+                  <div class="suggestions-section">
+                    <h3>Suggested Device Names</h3>
+                    <div class="suggestions-table-container">
+                      <table class="suggestions-table device-suggestions-table">
+                        <thead>
+                          <tr>
+                            <th>Area</th>
+                            <th>Current Name</th>
+                            <th>Suggested Name</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          ${this.deviceSuggestions.map(
+                            (suggestion) => html`
+                              <tr>
+                                <td>${suggestion.area_name}</td>
+                                <td>${suggestion.name}</td>
+                                <td>${suggestion.suggested_name}</td>
+                                <td>
+                                  <button
+                                    class="apply-button"
+                                    @click=${() =>
+                                      this.applyDeviceRename(
+                                        suggestion,
+                                        suggestion.suggested_name
+                                      )}
+                                  >
+                                    Apply
+                                  </button>
+                                </td>
+                              </tr>
+                            `
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="apply-all">
+                      <button
+                        class="primary"
+                        @click=${this.applyAllDeviceSuggestions}
+                      >
+                        Apply All Suggestions
+                      </button>
+                    </div>
+                  </div>
+                `
+              : ""}
           `}
         </div>
       </ha-card>
