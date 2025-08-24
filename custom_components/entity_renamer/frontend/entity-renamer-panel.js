@@ -130,6 +130,30 @@ class EntityRenamerPanel extends LitElement {
     this.selectedEntities = [];
   }
 
+  toggleSelectGroup(groupEntities, checked) {
+    if (checked) {
+      const newEntities = groupEntities.filter(
+        (e) => !this.selectedEntities.some((se) => se.entity_id === e.entity_id)
+      );
+      this.selectedEntities = [...this.selectedEntities, ...newEntities];
+    } else {
+      const ids = new Set(groupEntities.map((e) => e.entity_id));
+      this.selectedEntities = this.selectedEntities.filter(
+        (e) => !ids.has(e.entity_id)
+      );
+    }
+  }
+
+  groupEntitiesByArea() {
+    const groups = {};
+    for (const entity of this.filteredEntities) {
+      const area = entity.area_name || "No Area";
+      if (!groups[area]) groups[area] = [];
+      groups[area].push(entity);
+    }
+    return Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0]));
+  }
+
   toFriendlyName(entityId) {
     const [, namePart] = entityId.split(".");
     const base = namePart || entityId;
@@ -344,45 +368,56 @@ class EntityRenamerPanel extends LitElement {
             </div>
           ` : html`
             <div class="entity-table-container">
-              <table class="entity-table">
-                <thead>
-                  <tr>
-                    <th class="select-col">
-                      <input
-                        type="checkbox"
-                        ?checked=${this.selectedEntities.length === this.filteredEntities.length && this.filteredEntities.length > 0}
-                        @change=${() => this.selectedEntities.length === this.filteredEntities.length ? this.clearSelection() : this.selectAll()}
-                      />
-                    </th>
-                    <th>Area</th>
-                    <th>Device</th>
-                    <th>Name</th>
-                    <th>Entity ID</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${this.filteredEntities.length === 0 ? html`
-                    <tr>
-                      <td colspan="5" class="no-entities">No entities found</td>
-                    </tr>
-                  ` :
-                  this.filteredEntities.map(entity => html`
-                    <tr class="${this.selectedEntities.some(e => e.entity_id === entity.entity_id) ? 'selected' : ''}">
-                      <td>
+              <div class="select-all-row">
+                <input
+                  type="checkbox"
+                  ?checked=${this.selectedEntities.length === this.filteredEntities.length && this.filteredEntities.length > 0}
+                  @change=${() => this.selectedEntities.length === this.filteredEntities.length ? this.clearSelection() : this.selectAll()}
+                />
+                <span>Select All</span>
+              </div>
+
+              ${this.filteredEntities.length === 0
+                ? html`<div class="no-entities">No entities found</div>`
+                : this.groupEntitiesByArea().map(([area, entities]) => html`
+                    <details class="area-group" open>
+                      <summary>
                         <input
                           type="checkbox"
-                          ?checked=${this.selectedEntities.some(e => e.entity_id === entity.entity_id)}
-                          @change=${() => this.toggleSelectEntity(entity)}
+                          ?checked=${entities.every(e => this.selectedEntities.some(se => se.entity_id === e.entity_id))}
+                          @change=${(e) => this.toggleSelectGroup(entities, e.target.checked)}
                         />
-                      </td>
-                      <td>${entity.area_name}</td>
-                      <td>${entity.device_name}</td>
-                      <td>${entity.name}</td>
-                      <td>${entity.entity_id}</td>
-                    </tr>
-                  `)}
-                </tbody>
-              </table>
+                        ${area} (${entities.length})
+                      </summary>
+                      <table class="entity-table">
+                        <thead>
+                          <tr>
+                            <th class="select-col"></th>
+                            <th>Device</th>
+                            <th>Name</th>
+                            <th>Entity ID</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          ${entities.map(entity => html`
+                            <tr class="${this.selectedEntities.some(e => e.entity_id === entity.entity_id) ? 'selected' : ''}">
+                              <td>
+                                <input
+                                  type="checkbox"
+                                  ?checked=${this.selectedEntities.some(e => e.entity_id === entity.entity_id)}
+                                  @change=${() => this.toggleSelectEntity(entity)}
+                                />
+                              </td>
+                              <td>${entity.device_name}</td>
+                              <td>${entity.name}</td>
+                              <td>${entity.entity_id}</td>
+                            </tr>
+                          `)}
+                        </tbody>
+                      </table>
+                    </details>
+                  `)
+              }
             </div>
 
             <div class="actions">
@@ -588,6 +623,35 @@ class EntityRenamerPanel extends LitElement {
         text-align: center;
         padding: 32px;
         color: var(--secondary-text-color);
+      }
+
+      .select-all-row {
+        display: flex;
+        align-items: center;
+        padding: 8px 16px;
+        border-bottom: 1px solid var(--divider-color, #e0e0e0);
+      }
+
+      .select-all-row input {
+        margin-right: 8px;
+      }
+
+      .area-group {
+        margin-bottom: 8px;
+      }
+
+      .area-group summary {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        padding: 8px 16px;
+        background: var(--secondary-background-color, #f5f5f5);
+        border: 1px solid var(--divider-color, #e0e0e0);
+        border-radius: 4px;
+      }
+
+      .area-group summary input {
+        margin-right: 8px;
       }
 
       .actions {

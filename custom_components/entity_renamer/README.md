@@ -5,6 +5,7 @@ A custom component for Home Assistant that allows you to bulk rename entities us
 ## Features
 
 - View all entities in your Home Assistant instance with their area, device, name, and entity ID
+- Group entities by area with collapsible headers to handle large lists
 - Filter entities by area, device, or search term
 - Select multiple entities for bulk renaming
 - Get AI-powered entity ID suggestions from OpenAI following a structured naming template
