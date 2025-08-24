@@ -35,7 +35,7 @@ The integration adds a dedicated sidebar icon for easy access and provides a cle
 1. Make sure you have [HACS](https://hacs.xyz/) installed
 2. Go to HACS > Integrations
 3. Click the three dots in the top right corner and select "Custom repositories"
-4. Add the URL `https://github.com/terkilddk/AI-entity-renamer` and select "Integration" as the category
+4. Add the URL `https://github.com/gatesry/AI-entity-renamer` and select "Integration" as the category
 5. Click "Add"
 6. Search for "AI Entity Renamer" in HACS and install it
 7. Restart Home Assistant

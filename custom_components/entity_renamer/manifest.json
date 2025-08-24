@@ -1,10 +1,10 @@
 {
   "domain": "entity_renamer",
   "name": "AI Entity Renamer",
-  "documentation": "https://github.com/terkilddk/AI-entity-renamer",
-  "issue_tracker": "https://github.com/terkilddk/AI-entity-renamer/issues",
+  "documentation": "https://github.com/gatesry/AI-entity-renamer",
+  "issue_tracker": "https://github.com/gatesry/AI-entity-renamer/issues",
   "dependencies": ["http"],
-  "codeowners": ["@terkilddk"],
+  "codeowners": ["@gatesry"],
   "requirements": ["openai>=1.0.0"],
   "config_flow": true,
   "version": "1.0.0",

@@ -6,9 +6,9 @@ setup(
     name="ai_entity_renamer",
     version="1.0.0",
     description="AI Entity Renamer integration for Home Assistant",
-    author="terkilddk",
+    author="gatesry",
     author_email="example@example.com",
-    url="https://github.com/terkilddk/AI-entity-renamer",
+    url="https://github.com/gatesry/AI-entity-renamer",
     packages=find_packages(),
     install_requires=["openai>=1.0.0"],
     classifiers=[
