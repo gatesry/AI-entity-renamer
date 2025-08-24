@@ -1,11 +1,16 @@
 """Tests for AI Entity Renamer integration."""
+import os
+import sys
 import pytest
 from unittest.mock import patch, MagicMock
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from homeassistant.setup import async_setup_component
 from custom_components.entity_renamer import DOMAIN
 
 
+@pytest.mark.asyncio
 async def test_setup(hass):
     """Test the setup of the integration."""
     with patch("custom_components.entity_renamer.frontend.async_register_built_in_panel"), \
@@ -17,6 +22,7 @@ async def test_setup(hass):
         assert DOMAIN in hass.data
 
 
+@pytest.mark.asyncio
 async def test_apply_rename_service(hass):
     """Test the apply_rename service."""
     from custom_components.entity_renamer import apply_rename_service
