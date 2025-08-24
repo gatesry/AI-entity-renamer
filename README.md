@@ -12,16 +12,18 @@ A custom component for Home Assistant that allows you to bulk rename entities us
 Managing entity names in Home Assistant can become tedious as your smart home grows. This integration provides a user-friendly interface to:
 
 - View all entities with their area, device, name, and entity ID
+- Entities are grouped by area with collapsible headers for easier navigation
 - Filter and search for specific entities
 - Select multiple entities for bulk renaming
-- Get AI-powered name suggestions from OpenAI
-- Apply suggested names individually or all at once
+- Get AI-powered entity ID suggestions from OpenAI following a structured naming template
+- Apply suggested IDs and friendly names individually or all at once
 
 The integration adds a dedicated sidebar icon for easy access and provides a clean, intuitive interface for managing your entity names.
 
 ## Features
 
 - **Entity Browser**: View and filter all entities in your Home Assistant instance
+- **Collapsible Area Groups**: Entities are grouped by area with expandable headers to keep large lists manageable
 - **Bulk Selection**: Select multiple entities for batch operations
 - **AI Suggestions**: Get intelligent naming suggestions from OpenAI
 - **Bulk Apply**: Apply all suggestions at once or selectively choose which to apply
@@ -61,8 +63,23 @@ Once installed, the integration will automatically maintain its version informat
 2. Click on it to open the AI Entity Renamer interface
 3. Browse or search for entities you want to rename
 4. Select the entities you want to rename
-5. Click "Get Name Suggestions" to receive AI-generated name suggestions
-6. Review the suggestions and apply them individually or all at once
+5. Click "Get ID Suggestions" to receive AI-generated entity ID suggestions
+6. Review the suggestions and apply them individually or all at once. Applying a suggestion updates both the entity ID and its friendly name based on the suggested ID.
+
+### How naming suggestions work
+
+When you request suggestions, the integration sends each selected entity's
+ID, current name, device and area to OpenAI. The model is prompted to return
+concise IDs using the template:
+
+```
+<domain>.<location_code>_<device_type>_<function>_<identifier>
+```
+
+IDs use lowercase letters, numbers and underscores without leading or trailing
+underscores. The API responds with a JSON array of entity IDs in the same order
+as the input. The panel displays these IDs along with a readable name generated
+from each ID so you can confirm the change before applying it.
 
 ## Requirements
 
