@@ -2,13 +2,17 @@
 import pytest
 from unittest.mock import patch, MagicMock
 
+import asyncio
+import pytest
 from homeassistant.core import HomeAssistant
 
 
 @pytest.fixture
-def hass(event_loop):
+def hass():
     """Return a Home Assistant instance for testing."""
-    hass = HomeAssistant(event_loop)
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    hass = HomeAssistant(loop)
     hass.config.components.add("http")
     
     # Set up mocks for HTTP
@@ -31,8 +35,9 @@ def hass(event_loop):
     hass.helpers.entity_registry = MagicMock()
     
     yield hass
-    
-    event_loop.run_until_complete(hass.async_stop())
+
+    loop.run_until_complete(hass.async_stop())
+    loop.close()
 
 
 @pytest.fixture

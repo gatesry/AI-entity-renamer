@@ -38,9 +38,24 @@ class EntityRenamerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                             timeout=30.0
                         )
                     except TypeError as init_error:
-                        # Fallback for older versions or environment issues
-                        _LOGGER.warning("OpenAI client init failed, trying alternative: %s", init_error)
-                        client = openai.OpenAI(api_key=api_key)
+                        # Fallbacks for older versions or environment issues
+                        _LOGGER.warning(
+                            "OpenAI client init failed, trying alternative: %s",
+                            init_error,
+                        )
+                        try:
+                            client = openai.OpenAI(api_key=api_key)
+                        except TypeError as second_error:
+                            _LOGGER.warning(
+                                "OpenAI client init failed again, using basic HTTP client: %s",
+                                second_error,
+                            )
+                            import httpx
+
+                            client = openai.OpenAI(
+                                api_key=api_key,
+                                http_client=httpx.Client(timeout=30.0),
+                            )
                     
                     # Simple test call to validate the API key
                     await self.hass.async_add_executor_job(
@@ -129,9 +144,24 @@ class EntityRenamerOptionsFlow(config_entries.OptionsFlow):
                             timeout=30.0
                         )
                     except TypeError as init_error:
-                        # Fallback for older versions or environment issues
-                        _LOGGER.warning("OpenAI client init failed, trying alternative: %s", init_error)
-                        client = openai.OpenAI(api_key=api_key)
+                        # Fallbacks for older versions or environment issues
+                        _LOGGER.warning(
+                            "OpenAI client init failed, trying alternative: %s",
+                            init_error,
+                        )
+                        try:
+                            client = openai.OpenAI(api_key=api_key)
+                        except TypeError as second_error:
+                            _LOGGER.warning(
+                                "OpenAI client init failed again, using basic HTTP client: %s",
+                                second_error,
+                            )
+                            import httpx
+
+                            client = openai.OpenAI(
+                                api_key=api_key,
+                                http_client=httpx.Client(timeout=30.0),
+                            )
                     
                     # Simple test call to validate the API key
                     await self.hass.async_add_executor_job(
