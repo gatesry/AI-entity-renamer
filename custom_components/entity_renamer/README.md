@@ -7,7 +7,7 @@ A custom component for Home Assistant that allows you to bulk rename entities us
 - View all entities in your Home Assistant instance with their area, device, name, and entity ID
 - Filter entities by area, device, or search term
 - Select multiple entities for bulk renaming
-- Get AI-powered name suggestions from OpenAI
+- Get AI-powered entity ID suggestions from OpenAI following a structured naming template
 - Apply suggested names individually or all at once
 - Access via a dedicated sidebar icon
 
@@ -46,7 +46,7 @@ Once installed, the integration will automatically maintain its version informat
 2. Click on it to open the AI Entity Renamer interface
 3. Browse or search for entities you want to rename
 4. Select the entities you want to rename
-5. Click "Get Name Suggestions" to receive AI-generated name suggestions
+5. Click "Get ID Suggestions" to receive AI-generated entity ID suggestions
 6. Review the suggestions and apply them individually or all at once
 
 ## Services

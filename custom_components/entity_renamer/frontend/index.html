@@ -12,18 +12,18 @@
       background-color: #f5f5f5;
       color: #212121;
     }
-    
+
     .container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 20px;
     }
-    
+
     h1 {
       margin-top: 0;
       color: #03a9f4;
     }
-    
+
     .note {
       background-color: #fff3cd;
       border: 1px solid #ffeeba;
@@ -32,7 +32,7 @@
       border-radius: 4px;
       margin-bottom: 20px;
     }
-    
+
     .mock-data {
       background-color: #e8f5e9;
       border: 1px solid #c8e6c9;
@@ -41,7 +41,7 @@
       border-radius: 4px;
       margin-bottom: 20px;
     }
-    
+
     pre {
       background-color: #f8f9fa;
       border: 1px solid #e9ecef;
@@ -49,7 +49,7 @@
       padding: 15px;
       overflow: auto;
     }
-    
+
     code {
       font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-size: 14px;
@@ -108,13 +108,13 @@
           } else if (url === "/api/entity_renamer/suggest") {
             const body = JSON.parse(options.body);
             const entities = body.entities;
-            
+
             // Generate mock suggestions
             const suggestions = entities.map(entity => ({
               ...entity,
-              suggested_name: `${entity.area_name} ${entity.device_name} ${entity.entity_id.split('.')[0]}`
+              suggested_id: `${entity.entity_id}`
             }));
-            
+
             resolve({
               ok: true,
               json: () => Promise.resolve({
@@ -154,27 +154,27 @@
 <body>
   <div class="container">
     <h1>AI Entity Renamer - Test Page</h1>
-    
+
     <div class="note">
-      <strong>Note:</strong> This is a test page for the AI Entity Renamer panel. In a real Home Assistant environment, 
+      <strong>Note:</strong> This is a test page for the AI Entity Renamer panel. In a real Home Assistant environment,
       the panel would be loaded within the Home Assistant UI and have access to real entity data.
     </div>
-    
+
     <div class="mock-data">
       <strong>Mock Data:</strong> This page uses mock data for testing. The API calls are simulated.
     </div>
-    
+
     <entity-renamer-panel></entity-renamer-panel>
-    
+
     <h2>Developer Information</h2>
     <p>
       This test page allows you to preview the AI Entity Renamer panel UI without needing to install it in Home Assistant.
       The panel is using mock data and simulated API responses.
     </p>
-    
+
     <h3>Mock Entities</h3>
     <pre><code id="mockEntitiesJson"></code></pre>
-    
+
     <script>
       document.getElementById('mockEntitiesJson').textContent = JSON.stringify(mockEntities, null, 2);
     </script>
