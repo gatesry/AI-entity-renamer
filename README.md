@@ -25,6 +25,7 @@ The integration adds a dedicated sidebar icon for easy access and provides a cle
 
 - **Entity Browser**: View and filter all entities in your Home Assistant instance
 - **Device Browser**: Review devices with area, manufacturer and model details
+- **Tabbed Interface**: Switch between dedicated tabs for entities and devices
 - **Collapsible Area Groups**: Entities are grouped by area with expandable headers to keep large lists manageable
 - **Bulk Selection**: Select multiple entities or devices for batch operations
 - **AI Suggestions**: Get intelligent naming suggestions from OpenAI
@@ -63,7 +64,7 @@ Once installed, the integration will automatically maintain its version informat
 
 1. After installation, you'll see a new "AI Entity Renamer" icon in your Home Assistant sidebar
 2. Click on it to open the AI Entity Renamer interface
-3. Browse or search for entities or devices you want to rename
+3. Use the **Entities** and **Devices** tabs to browse for items you want to rename
 4. Select the entities or devices you want to rename
 5. Click "Get ID Suggestions" or "Get Name Suggestions" to receive AI-generated suggestions
 6. Review the suggestions and apply them individually or all at once. Applying an entity suggestion updates both the entity ID and its friendly name; applying a device suggestion updates the device name.
