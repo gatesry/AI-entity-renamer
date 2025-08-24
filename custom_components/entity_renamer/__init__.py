@@ -189,7 +189,16 @@ class OpenAISuggestionsView(HomeAssistantView):
                     status_code=400
                 )
             
-            client = openai.OpenAI(api_key=api_key)
+            # Initialize client with explicit parameters to avoid environment issues
+            try:
+                client = openai.OpenAI(
+                    api_key=api_key,
+                    timeout=30.0
+                )
+            except TypeError as init_error:
+                # Fallback for older versions or environment issues
+                _LOGGER.warning("OpenAI client init failed, trying alternative: %s", init_error)
+                client = openai.OpenAI(api_key=api_key)
             
             # Prepare the prompt
             prompt = "Suggest better, more descriptive names for the following Home Assistant entities. "

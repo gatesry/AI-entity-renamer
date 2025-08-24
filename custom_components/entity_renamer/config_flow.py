@@ -30,7 +30,17 @@ class EntityRenamerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 # Test the API key with OpenAI
                 try:
                     import openai
-                    client = openai.OpenAI(api_key=api_key)
+                    
+                    # Initialize client with explicit parameters to avoid environment issues
+                    try:
+                        client = openai.OpenAI(
+                            api_key=api_key,
+                            timeout=30.0
+                        )
+                    except TypeError as init_error:
+                        # Fallback for older versions or environment issues
+                        _LOGGER.warning("OpenAI client init failed, trying alternative: %s", init_error)
+                        client = openai.OpenAI(api_key=api_key)
                     
                     # Simple test call to validate the API key
                     await self.hass.async_add_executor_job(
@@ -111,7 +121,17 @@ class EntityRenamerOptionsFlow(config_entries.OptionsFlow):
                 # Test the API key with OpenAI
                 try:
                     import openai
-                    client = openai.OpenAI(api_key=api_key)
+                    
+                    # Initialize client with explicit parameters to avoid environment issues
+                    try:
+                        client = openai.OpenAI(
+                            api_key=api_key,
+                            timeout=30.0
+                        )
+                    except TypeError as init_error:
+                        # Fallback for older versions or environment issues
+                        _LOGGER.warning("OpenAI client init failed, trying alternative: %s", init_error)
+                        client = openai.OpenAI(api_key=api_key)
                     
                     # Simple test call to validate the API key
                     await self.hass.async_add_executor_job(
