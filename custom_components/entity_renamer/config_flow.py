@@ -44,9 +44,33 @@ class EntityRenamerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     )
                 except ImportError:
                     errors["base"] = "openai_not_installed"
-                except Exception as e:
-                    _LOGGER.error("Error validating OpenAI API key: %s", e)
+                except openai.AuthenticationError as e:
+                    _LOGGER.error("Invalid OpenAI API key: %s", e)
                     errors["api_key"] = "invalid_api_key"
+                except openai.RateLimitError as e:
+                    _LOGGER.error("OpenAI API rate limit exceeded: %s", e)
+                    errors["base"] = "rate_limit_exceeded"
+                except openai.APIConnectionError as e:
+                    _LOGGER.error("Failed to connect to OpenAI API: %s", e)
+                    errors["base"] = "connection_error"
+                except openai.APITimeoutError as e:
+                    _LOGGER.error("OpenAI API request timed out: %s", e)
+                    errors["base"] = "timeout_error"
+                except openai.BadRequestError as e:
+                    _LOGGER.error("Bad request to OpenAI API: %s", e)
+                    errors["base"] = "bad_request_error"
+                except openai.InternalServerError as e:
+                    _LOGGER.error("OpenAI API internal server error: %s", e)
+                    errors["base"] = "openai_server_error"
+                except openai.PermissionDeniedError as e:
+                    _LOGGER.error("Permission denied by OpenAI API: %s", e)
+                    errors["api_key"] = "permission_denied"
+                except openai.UnprocessableEntityError as e:
+                    _LOGGER.error("Unprocessable entity error from OpenAI API: %s", e)
+                    errors["base"] = "unprocessable_entity"
+                except Exception as e:
+                    _LOGGER.error("Unexpected error validating OpenAI API key: %s", e)
+                    errors["base"] = "unknown_error"
 
         # Show the form
         return self.async_show_form(
@@ -101,9 +125,33 @@ class EntityRenamerOptionsFlow(config_entries.OptionsFlow):
                     )
                 except ImportError:
                     errors["base"] = "openai_not_installed"
-                except Exception as e:
-                    _LOGGER.error("Error validating OpenAI API key: %s", e)
+                except openai.AuthenticationError as e:
+                    _LOGGER.error("Invalid OpenAI API key: %s", e)
                     errors["api_key"] = "invalid_api_key"
+                except openai.RateLimitError as e:
+                    _LOGGER.error("OpenAI API rate limit exceeded: %s", e)
+                    errors["base"] = "rate_limit_exceeded"
+                except openai.APIConnectionError as e:
+                    _LOGGER.error("Failed to connect to OpenAI API: %s", e)
+                    errors["base"] = "connection_error"
+                except openai.APITimeoutError as e:
+                    _LOGGER.error("OpenAI API request timed out: %s", e)
+                    errors["base"] = "timeout_error"
+                except openai.BadRequestError as e:
+                    _LOGGER.error("Bad request to OpenAI API: %s", e)
+                    errors["base"] = "bad_request_error"
+                except openai.InternalServerError as e:
+                    _LOGGER.error("OpenAI API internal server error: %s", e)
+                    errors["base"] = "openai_server_error"
+                except openai.PermissionDeniedError as e:
+                    _LOGGER.error("Permission denied by OpenAI API: %s", e)
+                    errors["api_key"] = "permission_denied"
+                except openai.UnprocessableEntityError as e:
+                    _LOGGER.error("Unprocessable entity error from OpenAI API: %s", e)
+                    errors["base"] = "unprocessable_entity"
+                except Exception as e:
+                    _LOGGER.error("Unexpected error validating OpenAI API key: %s", e)
+                    errors["base"] = "unknown_error"
 
         # Get current values
         current_api_key = self.config_entry.data.get("api_key", "")

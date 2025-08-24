@@ -12,8 +12,16 @@
     },
     "error": {
       "api_key_required": "OpenAI API key is required",
-      "invalid_api_key": "Invalid OpenAI API key",
-      "openai_not_installed": "OpenAI Python package is not installed"
+      "invalid_api_key": "Invalid OpenAI API key. Please check that your API key is correct and active.",
+      "permission_denied": "Access denied. Your OpenAI API key may not have the required permissions or your account may have restrictions.",
+      "openai_not_installed": "OpenAI Python package is not installed. Please install the openai package.",
+      "rate_limit_exceeded": "OpenAI API rate limit exceeded. Please wait a moment and try again.",
+      "connection_error": "Unable to connect to OpenAI API. Please check your internet connection and try again.",
+      "timeout_error": "OpenAI API request timed out. Please check your internet connection and try again.",
+      "bad_request_error": "Invalid request sent to OpenAI API. This may be a configuration issue.",
+      "openai_server_error": "OpenAI API is currently experiencing issues. Please try again later.",
+      "unprocessable_entity": "OpenAI API could not process the request. Please check your API key format.",
+      "unknown_error": "An unexpected error occurred while validating the API key. Please try again or check the logs for details."
     },
     "abort": {
       "already_configured": "AI Entity Renamer is already configured"
@@ -31,8 +39,16 @@
     },
     "error": {
       "api_key_required": "OpenAI API key is required",
-      "invalid_api_key": "Invalid OpenAI API key",
-      "openai_not_installed": "OpenAI Python package is not installed"
+      "invalid_api_key": "Invalid OpenAI API key. Please check that your API key is correct and active.",
+      "permission_denied": "Access denied. Your OpenAI API key may not have the required permissions or your account may have restrictions.",
+      "openai_not_installed": "OpenAI Python package is not installed. Please install the openai package.",
+      "rate_limit_exceeded": "OpenAI API rate limit exceeded. Please wait a moment and try again.",
+      "connection_error": "Unable to connect to OpenAI API. Please check your internet connection and try again.",
+      "timeout_error": "OpenAI API request timed out. Please check your internet connection and try again.",
+      "bad_request_error": "Invalid request sent to OpenAI API. This may be a configuration issue.",
+      "openai_server_error": "OpenAI API is currently experiencing issues. Please try again later.",
+      "unprocessable_entity": "OpenAI API could not process the request. Please check your API key format.",
+      "unknown_error": "An unexpected error occurred while validating the API key. Please try again or check the logs for details."
     }
   }
 }
