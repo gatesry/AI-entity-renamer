@@ -295,19 +295,23 @@ class OpenAISuggestionsView(HomeAssistantView):
 
             # Prepare the prompt
             prompt = (
-                "Suggest concise Home Assistant entity IDs using "
-                "`<domain>.<location_code>_<device_type>_<function>_<identifier>`. "
-                "Use lowercase letters, numbers and underscores, "
-                "and do not begin or end an ID with an underscore. "
-                "Return only a JSON array of `entity_id` strings "
-                "in the original order.\n\n"
+                "Suggest Home Assistant entity IDs following the official naming convention:\n"
+                "- Format: `<domain>.<location_code>_<device_type>_<function>_<identifier>`\n"
+                "- Use ONLY lowercase letters, numbers, and underscores\n"
+                "- Do NOT start or end with underscores\n"
+                "- Examples: 'light.kitchen_ceiling_main', 'sensor.bedroom_temp_primary'\n"
+                "- Keep location codes short (living_room → living, master_bedroom → master)\n"
+                "- Prioritize clarity and consistency over brevity\n"
+                "Return only a JSON array of entity_id strings in the original order.\n\n"
             )
 
             for entity in entities:
                 prompt += f"Entity ID: {entity['entity_id']}\n"
                 prompt += f"Current Name: {entity['name']}\n"
                 prompt += f"Device: {entity['device_name']}\n"
-                prompt += f"Area: {entity['area_name']}\n\n"
+                prompt += f"Area: {entity['area_name']}\n"
+                prompt += f"Domain: {entity['entity_id'].split('.')[0]}\n"
+                prompt += "Goal: Create systematic entity_id for automations\n\n"
 
             # Call OpenAI API
             response = await hass.async_add_executor_job(
@@ -317,8 +321,9 @@ class OpenAISuggestionsView(HomeAssistantView):
                         {
                             "role": "system",
                             "content": (
-                                "You are a helpful assistant that suggests concise Home Assistant "
-                                "entity IDs following a standardized naming template."
+                                "You are a Home Assistant entity naming expert. Create technical entity IDs "
+                                "following HA's strict naming conventions for use in automations and integrations. "
+                                "Focus on machine-readability and systematic organization."
                             ),
                         },
                         {"role": "user", "content": prompt},
@@ -429,13 +434,22 @@ class OpenAIDeviceSuggestionsView(HomeAssistantView):
 
                     client = openai.OpenAI(api_key=api_key, http_client=httpx.Client(timeout=30.0))
 
-            prompt = "Suggest concise device names for Home Assistant. Return a JSON array of names in the original order.\n\n"
+            prompt = (
+                "Suggest human-readable device names for Home Assistant following these rules:\n"
+                "- Use proper capitalization and spaces\n"
+                "- Format: '[Location] [Device Type]' or '[Descriptive Name]'\n"
+                "- Be concise but clear for UI display\n"
+                "- Consider the device's physical location and purpose\n"
+                "- Examples: 'Kitchen Light', 'Living Room Thermostat', 'Main Bedroom Motion Sensor'\n"
+                "Return only a JSON array of device names in the original order.\n\n"
+            )
 
             for device in devices:
-                prompt += f"Current Name: {device['name']}\n"
-                prompt += f"Manufacturer: {device.get('manufacturer', '')}\n"
-                prompt += f"Model: {device.get('model', '')}\n"
-                prompt += f"Area: {device.get('area_name', '')}\n\n"
+                prompt += f"Device: {device['name']}\n"
+                prompt += f"Manufacturer: {device.get('manufacturer', 'Unknown')}\n"
+                prompt += f"Model: {device.get('model', 'Unknown')}\n"
+                prompt += f"Area: {device.get('area_name', 'No Area')}\n"
+                prompt += "Goal: Create a user-friendly name for dashboard display\n\n"
 
             response = await hass.async_add_executor_job(
                 lambda: client.chat.completions.create(
@@ -444,7 +458,9 @@ class OpenAIDeviceSuggestionsView(HomeAssistantView):
                         {
                             "role": "system",
                             "content": (
-                                "You are a helpful assistant that suggests concise device names for Home Assistant."
+                                "You are a Home Assistant device naming expert. Create user-friendly device names "
+                                "that are clear, location-based, and suitable for UI display. Focus on human "
+                                "readability over technical structure."
                             ),
                         },
                         {"role": "user", "content": prompt},
@@ -469,6 +485,19 @@ class OpenAIDeviceSuggestionsView(HomeAssistantView):
                         status_code=500,
                     )
 
+                # Validate device name format
+                def _validate_device_name(name: str) -> str:
+                    """Ensure device name follows proper conventions."""
+                    if not name or not isinstance(name, str):
+                        return "Unnamed Device"
+
+                    # Ensure proper capitalization
+                    name = name.strip()
+                    if name.islower():
+                        name = " ".join(word.capitalize() for word in name.split())
+
+                    return name
+
                 result = []
                 for i, device in enumerate(devices):
                     suggestion = suggestions[i]
@@ -478,7 +507,10 @@ class OpenAIDeviceSuggestionsView(HomeAssistantView):
                             or suggestion.get("suggested_name")
                             or next(iter(suggestion.values()), "")
                         )
-                    result.append({**device, "suggested_name": suggestion})
+
+                    # Add validation
+                    validated_name = _validate_device_name(suggestion)
+                    result.append({**device, "suggested_name": validated_name})
 
                 return self.json({"success": True, "suggestions": result})
 
